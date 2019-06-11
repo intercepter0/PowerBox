@@ -23,7 +23,8 @@ opts = {
         "write": ('напечатай', 'напиши', 'напечатать', 'написать'),
         "lock": ('заблокировать', 'выйти из сеанса'),
         "copy": ('скопировать', 'скопируй'),
-        "paste": ('вставить', 'вставь'),
+        "idk": ('простите я вас не понимаю', 'не понимаю'),
+        "notify": ('напомнить', 'создать напоминание', 'напомни'),
         "line": ('открыть строку', 'открыть поиск'),
         "settings": ('открыть настройки', 'настройки'),
         "shutdown": ('завершение работы', 'выключить компьютер'),
@@ -71,7 +72,6 @@ def callback(recognizer, audio):
         cmd = recognize_cmd(cmd)
         if cmd['percent'] > 70:
             execute_cmd(cmd['cmd'], voice)
-            print("Execute finished!")
         else:
             speak("Простите, я вас не понимаю.")
 
@@ -79,7 +79,6 @@ def callback(recognizer, audio):
         print("[log] Голос не распознан!")
     except sr.RequestError as e:
         print("[log] Ошибка сети")
-    print("Starting listen...")
     listen()
 
 
@@ -121,10 +120,20 @@ def execute_cmd(cmd, parameter):
         os.system('rundll32 user32.dll LockWorkStation')
 
     elif cmd == 'copy':
-        pass
+        pyperclip.copy(parameter.replace('скопировать', '').replace('скопируй', '').strip())
 
-    elif cmd == 'paste':
-        pyperclip.paste()
+    elif cmd == 'notify':
+        for i in opts['cmds'].get("notify"):
+            parameter = parameter.replace(i, '').strip()
+        try:
+            time = parameter.split(' ')[-1]
+            parameter = parameter.replace(time, '').strip()
+            if parameter.split(' ')[-1] == "в":
+                parameter = parameter.replace(parameter.split(' ')[-1], '').strip()
+            notify_message = parameter
+            speak("Хорошо, напомню '"+notify_message+"' в "+time)
+        except Exception as e:
+            speak("Ошибка: не удалось создать напоминание")
 
     elif cmd == 'weather':
         weather = dict()
@@ -134,7 +143,7 @@ def execute_cmd(cmd, parameter):
         obs = owm.weather_at_place('Севастополь')
         w = obs.get_weather()
 
-        weather['temp'] = w.get_temperature(unit='celsius')['temp']
+        weather['temp'] = round(w.get_temperature(unit='celsius')['temp'])
         weather['status'] = w.get_detailed_status()
         weather['pressure'] = (str(round(w.get_pressure()['press']*0.750063755419211)))  # гПа -> мм.р.с
         p1 = [0, 5, 6, 7, 8, 9]
@@ -144,7 +153,7 @@ def execute_cmd(cmd, parameter):
             weather['pressure'] = str(weather['pressure']).__add__(" миллиметр")
         else:
             weather['pressure'] = str(weather['pressure']).__add__(" миллиметрa")
-            weather['pressure'] = weather['pressure'].__add__(" ртутного столба")
+        weather['pressure'] = weather['pressure'].__add__(" ртутного столба")
 
         weather['humidity'] = str(w.get_humidity()) + "%"
         speak("В Вашем городе сейчас {1} , температура: {0}°. Давление: {2}, влажность: {3}".format(weather['temp'],
