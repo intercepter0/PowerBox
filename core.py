@@ -34,13 +34,10 @@ opts = {
         "browser_search": ('искать в браузере', 'искать в интернете', 'ищи в браузере', 'ищи в интернете', 'поиск в интернете')
     }
 }
-ambient_noise_adjusted = False
 
-
-# Functions
+# Stop main thread until user's input
 def listen():
     global audio
-    global ambient_noise_adjusted
     with sr.Microphone() as source:
         r.adjust_for_ambient_noise(source, duration=0.2)
         print('[log]: Listening...')
