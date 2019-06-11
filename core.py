@@ -103,7 +103,7 @@ def execute_cmd(cmd, parameter):
     if cmd == 'ctime':
         # Сказать текущее время
         now = datetime.datetime.now()
-        speak('Сейчас ' + str(now.hour) + ':' + (str(now.minute) if len(str(now.minute)) > 1 else '0'+str(now.minute)))
+        speak('Сейчас ' + str(now.hour) + ':' + (str(now.minute) if len(str(now.minute)) > 1 else '0' + str(now.minute)))
     elif cmd == 'shutdown':
         os.system('shutdown -s')
         speak('Выключаю. Вы можете отменить это действие.')
@@ -182,12 +182,13 @@ def execute_cmd(cmd, parameter):
             print(math_request, " ", e)
 
     elif cmd == 'browser_search':
+        # Search in browser
         ress = list(parameter.split(' '))
         not_request = ('искать', 'поиск', 'интернете', 'браузере')
         for i in ress:
             for j in not_request:
                 if fuzz.ratio(i, j) > 60:
-                    for h in range(0, ress.index(i)+1):
+                    for h in range(0, ress.index(i) + 1):
                         ress[h] = ''
         web_request = "https://yandex.ru/search/?text="
         for l in ress:
@@ -213,4 +214,3 @@ listen()
 event = threading.Event()
 #ui_thread = threading.Thread(target=listen)
 #ui_thread.start()
-
