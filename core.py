@@ -43,7 +43,7 @@ def listen():
     global ambient_noise_adjusted
     with sr.Microphone() as source:
         r.adjust_for_ambient_noise(source, duration=0.2)
-        print('Say something...')
+        print('[log]: Listening...')
         r.pause_threshold = 0.5
         r.non_speaking_duration = 0.5
         audio = r.listen(source)
@@ -81,7 +81,7 @@ def callback(recognizer, audio):
         print("[log] Ошибка сети")
     listen()
 
-
+# Uncorrect recognization
 def recognize_cmd(cmd):
     RC = {'cmd': '', 'percent': 0}
     for c, v in opts['cmds'].items():
@@ -99,29 +99,37 @@ def recognize_cmd(cmd):
 
 
 def execute_cmd(cmd, parameter):
-    print("Exec: ", cmd)
+    print("[log]: Exec: ", cmd)
+
+    # Say current time
     if cmd == 'ctime':
-        # Сказать текущее время
         now = datetime.datetime.now()
         speak('Сейчас ' + str(now.hour) + ':' + (str(now.minute) if len(str(now.minute)) > 1 else '0' + str(now.minute)))
+
+    # Turn off computer
     elif cmd == 'shutdown':
         os.system('shutdown -s')
         speak('Выключаю. Вы можете отменить это действие.')
 
+    # Do not turning off computer
     elif cmd == 'shutdown_cancel':
         os.system('shutdown -a')
         speak('Отменяю завершение работы.')
 
+    # Restart computer
     elif cmd == 'restart':
         os.system('shutdown -r')
         speak('Перезагружаю. Вы можете отменить это действие.')
 
+    # Lock current session
     elif cmd == 'lock':
         os.system('rundll32 user32.dll LockWorkStation')
 
+    # Copy imput to clipboard
     elif cmd == 'copy':
         pyperclip.copy(parameter.replace('скопировать', '').replace('скопируй', '').strip())
 
+    # ???
     elif cmd == 'notify':
         for i in opts['cmds'].get("notify"):
             parameter = parameter.replace(i, '').strip()
@@ -135,6 +143,7 @@ def execute_cmd(cmd, parameter):
         except Exception as e:
             speak("Ошибка: не удалось создать напоминание")
 
+    # Say current weather
     elif cmd == 'weather':
         weather = dict()
 
@@ -159,19 +168,23 @@ def execute_cmd(cmd, parameter):
         speak("В Вашем городе сейчас {1} , температура: {0}°. Давление: {2}, влажность: {3}".format(weather['temp'],
                 weather['status'], weather['pressure'], weather['humidity']))
 
+    # Write input to current input line
     elif cmd == 'write':
         w_request = parameter
         for i in opts['cmds'].get("write"):
             w_request = w_request.replace(i, '')
         keyboard.write(w_request.strip())
 
+    # Open "line"
     elif cmd == 'line':
         jar_path = os.path.realpath(__file__).replace("core.py", "") + "Powerline.jar"
         os.system('java -jar "'+jar_path+'"')
 
+    # Open dialog
     elif cmd == 'settings':
         ui_hook.init()
 
+    # Evaluate math request
     elif cmd == 'count':
         removed = ('сколько будет', 'посчитай')
         math_request = parameter.replace(removed[0], '').replace(removed[1], '').replace('разделить на', '/').replace('умножить на', '*').replace('в квадрате', '** 2').replace('в кубе', '** 3').replace('в степени', '**').replace('плюс', '+').replace('минус', '-').replace("х", "*").replace('два', '2').replace('три', '3').replace('четыре', '4').strip()
@@ -181,8 +194,8 @@ def execute_cmd(cmd, parameter):
             speak("Простите, я не могу это посчитать.")
             print(math_request, " ", e)
 
+    # Search in browser
     elif cmd == 'browser_search':
-        # Search in browser
         ress = list(parameter.split(' '))
         not_request = ('искать', 'поиск', 'интернете', 'браузере')
         for i in ress:
@@ -195,6 +208,7 @@ def execute_cmd(cmd, parameter):
             web_request += l+"%20"
         webbrowser.open(web_request)
 
+    # Say thanks
     elif cmd == 'thanks':
         speak('И Вам спасибо')
 
