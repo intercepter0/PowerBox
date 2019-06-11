@@ -103,7 +103,7 @@ def execute_cmd(cmd, parameter):
         now = datetime.datetime.now()
         speak('Сейчас ' + str(now.hour) + ':' + (str(now.minute) if len(str(now.minute)) > 1 else '0' + str(now.minute)))
 
-    # Turn off computer
+    # Turn off computer ( 1 min delay )
     elif cmd == 'shutdown':
         os.system('shutdown -s')
         speak('Выключаю. Вы можете отменить это действие.')
@@ -126,7 +126,7 @@ def execute_cmd(cmd, parameter):
     elif cmd == 'copy':
         pyperclip.copy(parameter.replace('скопировать', '').replace('скопируй', '').strip())
 
-    # ???
+    # Notify user in future for sth
     elif cmd == 'notify':
         for i in opts['cmds'].get("notify"):
             parameter = parameter.replace(i, '').strip()
@@ -220,8 +220,10 @@ with mic as source:
 
 # Init speak engine
 speak_engine = pyttsx3.init()
+
+# Pre-init ui
 ui_hook.pre_init()
-speak("Приветствую. Я Вас слушаю")
 
 # Begin main recurse loop
+speak("Приветствую. Я Вас слушаю")
 listen()
