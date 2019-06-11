@@ -94,7 +94,7 @@ def recognize_cmd(cmd):
     print("Ratio: ", RC['percent'])
     return RC
 
-
+# Execute correct command
 def execute_cmd(cmd, parameter):
     print("[log]: Exec: ", cmd)
 
@@ -210,18 +210,18 @@ def execute_cmd(cmd, parameter):
         speak('И Вам спасибо')
 
 
-# Run
+# Init recognizer
 r = sr.Recognizer()
-mic = sr.Microphone(device_index=1)
 
+# Init microphone
+mic = sr.Microphone(device_index=1)
 with mic as source:
     r.adjust_for_ambient_noise(source)
 
+# Init speak engine
 speak_engine = pyttsx3.init()
 ui_hook.pre_init()
 speak("Приветствую. Я Вас слушаю")
 
+# Begin main recurse loop
 listen()
-event = threading.Event()
-#ui_thread = threading.Thread(target=listen)
-#ui_thread.start()
