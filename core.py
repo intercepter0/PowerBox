@@ -49,7 +49,7 @@ def listen():
         audio = r.listen(source)
         callback(r, audio)
 
-
+# Say any text message
 def speak(message):
     print("[log]: Speak: ", message)
     speak_engine.say(message)
@@ -57,7 +57,7 @@ def speak(message):
     ui_hook.append_log("PowerBox >> " + str(message))
     speak_engine.stop()
 
-
+# Choose: known input or no
 def callback(recognizer, audio):
     try:
         voice = recognizer.recognize_google(audio, language="ru-RU").lower()
