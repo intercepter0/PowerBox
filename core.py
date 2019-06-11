@@ -43,7 +43,7 @@ def listen():
     global ambient_noise_adjusted
     with sr.Microphone() as source:
         r.adjust_for_ambient_noise(source, duration=0.2)
-        print('Say something...')
+        print('[log]: Listening...')
         r.pause_threshold = 0.5
         r.non_speaking_duration = 0.5
         audio = r.listen(source)
