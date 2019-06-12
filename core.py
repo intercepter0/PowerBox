@@ -94,7 +94,7 @@ def recognize_cmd(cmd):
     print("Ratio: ", RC['percent'])
     return RC
 
-
+# Execute correct command
 def execute_cmd(cmd, parameter):
     print("[log]: Exec: ", cmd)
 
@@ -103,7 +103,7 @@ def execute_cmd(cmd, parameter):
         now = datetime.datetime.now()
         speak('Сейчас ' + str(now.hour) + ':' + (str(now.minute) if len(str(now.minute)) > 1 else '0' + str(now.minute)))
 
-    # Turn off computer
+    # Turn off computer ( 1 min delay )
     elif cmd == 'shutdown':
         os.system('shutdown -s')
         speak('Выключаю. Вы можете отменить это действие.')
@@ -126,7 +126,7 @@ def execute_cmd(cmd, parameter):
     elif cmd == 'copy':
         pyperclip.copy(parameter.replace('скопировать', '').replace('скопируй', '').strip())
 
-    # ???
+    # Notify user in future for sth
     elif cmd == 'notify':
         for i in opts['cmds'].get("notify"):
             parameter = parameter.replace(i, '').strip()
@@ -210,18 +210,20 @@ def execute_cmd(cmd, parameter):
         speak('И Вам спасибо')
 
 
-# Run
+# Init recognizer
 r = sr.Recognizer()
-mic = sr.Microphone(device_index=1)
 
+# Init microphone
+mic = sr.Microphone(device_index=1)
 with mic as source:
     r.adjust_for_ambient_noise(source)
 
+# Init speak engine
 speak_engine = pyttsx3.init()
-ui_hook.pre_init()
-speak("Приветствую. Я Вас слушаю")
 
+# Pre-init ui
+ui_hook.pre_init()
+
+# Begin main recurse loop
+speak("Приветствую. Я Вас слушаю")
 listen()
-event = threading.Event()
-#ui_thread = threading.Thread(target=listen)
-#ui_thread.start()
