@@ -22,7 +22,7 @@ class Ui_Dialog(object):
             self.close()
 
     def add_notification( self, time, message ):
-        self.listWidget.addItem( "[ {0} ] - {1}".format(time, message.capitalize()) )
+        self.listWidget.addItem( "[ {0} ] - {1}".format(time, message) )
 
 
     def append_log( self, message ):

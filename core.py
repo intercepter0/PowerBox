@@ -47,12 +47,12 @@ def update_notifications():
     global notifications
 
     notifications = numpy.load( database_path + ".npy", allow_pickle=True ).item()
+    ui_hook.update_notifications(database_path)
 
 # Add notification to the database
 def add_notification( time, message ):
     global database_path
     global notifications
-    ui_hook.add_notification(time,message)
 
     # Decorate message
     message = 'Напоминание: ' + message.capitalize() + '.'
