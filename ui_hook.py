@@ -15,6 +15,9 @@ def pre_init():
     ui = Ui_Dialog()
     ui.setupUi(Dialog)
 
+def add_notification(time, message):
+    ui.add_notification(time,message)
+
 
 def init():
     Dialog.show()
@@ -23,4 +26,3 @@ def init():
 
 def append_log(message):
     ui.append_log(message)
-

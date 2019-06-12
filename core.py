@@ -52,6 +52,7 @@ def update_notifications():
 def add_notification( time, message ):
     global database_path
     global notifications
+    ui_hook.add_notification(time,message)
 
     # Decorate message
     message = 'Напоминание: ' + message.capitalize() + '.'

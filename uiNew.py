@@ -1,17 +1,3 @@
-public class Handler {
-    public static void main(String[] args) {
-        Runtime runtime = Runtime.getRuntime();
-        try {
-          runtime.exec()
-        }
-        catch (Exception e) {
-          e.printStackTrace();
-        }
-    }
-}
-for index, name in enumerate(sr.Microphone.list_microphone_names()):
-            self.comboBox.addItem(name)
-
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'C:\Users\Alex\Documents\powerbox.ui',
@@ -229,16 +215,6 @@ class Ui_Dialog(object):
         self.label_5.setPixmap(QtGui.QPixmap(":/result/right.png"))
         self.label_5.setScaledContents(True)
         self.label_5.setObjectName("label_5")
-
-
-        #self.label_6 = QtWidgets.QLabel(Dialog)
-        #self.label_6.setGeometry(QtCore.QRect(0, -40, 791, 611))
-        #self.label_6.setText("")
-        #self.label_6.setPixmap(QtGui.QPixmap(":/bg/image036.png"))
-        #self.label_6.setScaledContents(True)
-        #self.label_6.setObjectName("label_6")
-
-
         self.label_7 = QtWidgets.QLabel(self.settings)
         self.label_7.setGeometry(QtCore.QRect(0, 120, 501, 261))
         self.label_7.setText("")
@@ -266,6 +242,8 @@ class Ui_Dialog(object):
         self.label.setPixmap(QtGui.QPixmap(":/logo/powerboxBright.png"))
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
+
+
         self.label_2 = QtWidgets.QLabel(Dialog)
         self.label_2.setGeometry(QtCore.QRect(170, 20, 171, 71))
         font = QtGui.QFont()
@@ -275,26 +253,13 @@ class Ui_Dialog(object):
         self.label_2.setObjectName("label_2")
         self.label_3 = QtWidgets.QLabel(Dialog)
         self.label_3.setGeometry(QtCore.QRect(171, 60, 161, 61))
-        font = QtGui.QFont()
-        font.setFamily("Bahnschrift SemiBold")
-        font.setPointSize(12)
-        font.setWeight(75)
-        font.setItalic(False)
-        font.setUnderline(False)
-        font.setBold(True)
-        self.label_3.setFont(font)
-        self.label_3.setStyleSheet("QLabel {\n"
-"    color: rgb(38, 96, 140);\n"
-"}")
-        self.label_3.setFrameShadow(QtWidgets.QFrame.Plain)
-        self.label_3.setScaledContents(False)
-        self.label_3.setWordWrap(False)
-        self.label_3.setObjectName("label_3")
+
 
         font = QtGui.QFont()
         font.setFamily("Bahnschrift SemiBold")
         font.setPointSize(12)
         font.setWeight(75)
+        font.setItalic(False)
         font.setUnderline(False)
         font.setBold(True)
         self.label_3.setFont(font)
@@ -313,18 +278,19 @@ class Ui_Dialog(object):
         self.pushButton_2.setIcon(icon2)
         self.pushButton_2.setIconSize(QtCore.QSize(48, 48))
         self.pushButton_2.setObjectName("pushButton_2")
+        self.label_6 = QtWidgets.QLabel(Dialog)
+        self.label_6.setGeometry(QtCore.QRect(0, -40, 791, 611))
+        self.label_6.setText("")
+        self.label_6.setPixmap(QtGui.QPixmap(":/bg/image036.png"))
+        self.label_6.setScaledContents(True)
+        self.label_6.setObjectName("label_6")
 
+        
 
-
-
-#-------------\
-
-
-
-#--------------/
         self.retranslateUi(Dialog)
-        self.comboBox.setCurrentIndex(1)
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(0)
+        self.comboBox.setCurrentIndex(-1)
+        self.comboBox_2.setCurrentIndex(-1)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
