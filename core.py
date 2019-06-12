@@ -2,16 +2,21 @@ import os
 from pyowm import OWM
 import speech_recognition as sr
 from fuzzywuzzy import fuzz
+from time import sleep
+from termcolor import colored, cprint
 import pyttsx3
 import datetime
 import webbrowser
 import random
+import numpy
+import functools
 import pyperclip
 import getpass
 import ui_hook
 import threading
 import keyboard
 
+database_path = os.path.realpath(__file__).replace("core.py", "notifications_database")
 
 opts = {
     "alias": ('слушай', 'эй'),
@@ -23,10 +28,11 @@ opts = {
         "write": ('напечатай', 'напиши', 'напечатать', 'написать'),
         "lock": ('заблокировать', 'выйти из сеанса'),
         "copy": ('скопировать', 'скопируй'),
+        "clear_notifications": ('убрать напоминания', 'отменить напоминания'),
         "idk": ('простите я вас не понимаю', 'не понимаю'),
-        "notify": ('напомнить', 'создать напоминание', 'напомни'),
+        "notify": ('напомнить', 'создать напоминание', 'напомни', 'напомни пожалуйста'),
         "line": ('открыть строку', 'открыть поиск'),
-        "settings": ('открыть настройки', 'настройки'),
+        "settings": ('открыть настройки', 'настройки приложения'),
         "shutdown": ('завершение работы', 'выключить компьютер'),
         "shutdown_cancel": ('отмена', 'не выключать компьютер'),
         "restart": ('перезагрузить', 'перезагрузить компьютер', 'перезагрузить компьютер', 'перезагрузка компьютера'),
@@ -35,20 +41,75 @@ opts = {
     }
 }
 
+# Upload new notifications to database from file
+def update_notifications():
+    global database_path
+    global notifications
+
+    notifications = numpy.load( database_path + ".npy", allow_pickle=True ).item()
+
+# Add notification to the database
+def add_notification( time, message ):
+    global database_path
+    global notifications
+
+    # Decorate message
+    message = 'Напоминание: ' + message.capitalize() + '.'
+
+    if(notifications.get(time)):
+        old_message = notifications.get( time )
+        notifications.update( {time: old_message + ' ' + message} )
+    else:
+        notifications.update( {time: message} )
+
+    numpy.save( database_path+".npy", notifications )
+    update_notifications()
+
+# Delete all notifications ( clear dictionary )
+def clear_notifications():
+    global notifications
+    global database_path
+
+    notifications.clear()
+    numpy.save( database_path+".npy", notifications )
+    update_notifications()
+
+# Notifications handle loop
+def wait_for_notifications():
+    global notifications
+
+    print(' [log] Waiting for notification trigger...' )
+    while( True ):
+        now = datetime.datetime.now()
+        current_time = str(now.hour) + ':' + (str(now.minute) if len(str(now.minute)) > 1 else '0' + str(now.minute))
+        if(current_time in notifications):
+            speak( notifications.pop(current_time) )
+        sleep(60)
+
+# Make decorator whitch makes function synchronized
+def synchronized(wrapped):
+    lock = threading.Lock()
+    @functools.wraps(wrapped)
+    def _wrap(*args, **kwargs):
+        with lock:
+            return wrapped(*args, **kwargs)
+    return _wrap
+
 # Stop main thread until user's input
 def listen():
     global audio
     with sr.Microphone() as source:
-        r.adjust_for_ambient_noise(source, duration=0.2)
-        print('[log]: Listening...')
+        r.adjust_for_ambient_noise( source, duration=0.2 )
+        print(" [log] Listening...")
         r.pause_threshold = 0.5
         r.non_speaking_duration = 0.5
         audio = r.listen(source)
         callback(r, audio)
 
 # Say any text message
+@synchronized
 def speak(message):
-    print("[log]: Speak: ", message)
+    print(" [log] Speak: ", message)
     speak_engine.say(message)
     speak_engine.runAndWait()
     ui_hook.append_log("PowerBox >> " + str(message))
@@ -59,7 +120,7 @@ def callback(recognizer, audio):
     try:
         voice = recognizer.recognize_google(audio, language="ru-RU").lower()
         ui_hook.append_log(getpass.getuser()+((8-len(list(getpass.getuser())))*' ')+" >> "+voice.capitalize())
-        print("[log] Распознано: "+voice)
+        print(" [log] Распознано: "+voice)
 
         cmd = voice
 
@@ -73,9 +134,9 @@ def callback(recognizer, audio):
             speak("Простите, я вас не понимаю.")
 
     except sr.UnknownValueError:
-        print("[log] Голос не распознан!")
+        print(" [log] Голос не распознан!")
     except sr.RequestError as e:
-        print("[log] Ошибка сети")
+        print(" [log] Ошибка сети")
     listen()
 
 # Uncorrect recognization
@@ -90,13 +151,11 @@ def recognize_cmd(cmd):
             if x in cmd:
                 RC['cmd'] = c
                 RC['percent'] = 95
-                print(cmd," contains ",x,"!")
-    print("Ratio: ", RC['percent'])
     return RC
 
 # Execute correct command
 def execute_cmd(cmd, parameter):
-    print("[log]: Exec: ", cmd)
+    print(" [log] Exec: ", cmd)
 
     # Say current time
     if cmd == 'ctime':
@@ -126,6 +185,10 @@ def execute_cmd(cmd, parameter):
     elif cmd == 'copy':
         pyperclip.copy(parameter.replace('скопировать', '').replace('скопируй', '').strip())
 
+    elif cmd == 'clear_notifications':
+        clear_notifications()
+        speak("Готово.")
+
     # Notify user in future for sth
     elif cmd == 'notify':
         for i in opts['cmds'].get("notify"):
@@ -133,12 +196,15 @@ def execute_cmd(cmd, parameter):
         try:
             time = parameter.split(' ')[-1]
             parameter = parameter.replace(time, '').strip()
-            if parameter.split(' ')[-1] == "в":
-                parameter = parameter.replace(parameter.split(' ')[-1], '').strip()
+            #if parameter.split(' ')[-1] == "в ":
+            #    parameter = parameter.replace(parameter.split(' ')[-1], '').strip()
+            parameter = parameter[:-2]
             notify_message = parameter
+            add_notification(time,notify_message)
             speak("Хорошо, напомню '"+notify_message+"' в "+time)
         except Exception as e:
-            speak("Ошибка: не удалось создать напоминание")
+            speak("Ошибка: не удалось создать напоминание "+str(e))
+            raise e
 
     # Say current weather
     elif cmd == 'weather':
@@ -172,10 +238,10 @@ def execute_cmd(cmd, parameter):
             w_request = w_request.replace(i, '')
         keyboard.write(w_request.strip())
 
-    # Open "line"
+    # Open powerline
     elif cmd == 'line':
-        jar_path = os.path.realpath(__file__).replace("core.py", "") + "Powerline.jar"
-        os.system('java -jar "'+jar_path+'"')
+        powerline_path = os.path.realpath(__file__).replace("core.py", "") + "Powerline.exe"
+        os.system(powerline_path)
 
     # Open dialog
     elif cmd == 'settings':
@@ -203,20 +269,20 @@ def execute_cmd(cmd, parameter):
         web_request = "https://yandex.ru/search/?text="
         for l in ress:
             web_request += l+"%20"
-        webbrowser.open(web_request)
+        webbrowser.open( web_request )
 
     # Say thanks
     elif cmd == 'thanks':
-        speak('И Вам спасибо')
+        speak( 'И Вам спасибо' )
 
 
 # Init recognizer
 r = sr.Recognizer()
 
 # Init microphone
-mic = sr.Microphone(device_index=1)
+mic = sr.Microphone( device_index=1 )
 with mic as source:
-    r.adjust_for_ambient_noise(source)
+    r.adjust_for_ambient_noise( source )
 
 # Init speak engine
 speak_engine = pyttsx3.init()
@@ -224,6 +290,41 @@ speak_engine = pyttsx3.init()
 # Pre-init ui
 ui_hook.pre_init()
 
+# Clear console
+os.system('cls')
+
+# Print pretty banner
+banner = ["""
+    =-----------------------------------Welcome to---------------------------------------=
+                                                                                    """, """
+             ██████╗  ██████╗ ██╗    ██╗███████╗██████╗ ██████╗  ██████╗ ██╗  ██╗
+             ██╔══██╗██╔═══██╗██║    ██║██╔════╝██╔══██╗██╔══██╗██╔═══██╗╚██╗██╔╝
+             ██████╔╝██║   ██║██║ █╗ ██║█████╗  ██████╔╝██████╔╝██║   ██║ ╚███╔╝
+             ██╔═══╝ ██║   ██║██║███╗██║██╔══╝  ██╔══██╗██╔══██╗██║   ██║ ██╔██╗
+             ██║     ╚██████╔╝╚███╔███╔╝███████╗██║  ██║██████╔╝╚██████╔╝██╔╝ ██╗
+             ╚═╝      ╚═════╝  ╚══╝╚══╝ ╚══════╝╚═╝  ╚═╝╚═════╝  ╚═════╝ ╚═╝  ╚═╝
+                                                                                    """, """
+    =------------------------------------------------------------------------------------=
+                                                                                    """]
+cprint( banner[0],  'white')
+cprint( banner[1],  'cyan' )
+cprint( banner[2],  'white')
+
+# Notifications database
+notifications = dict()
+update_notifications()
+
+# Print cached notifications
+print(' [log] Loaded notifications: ', notifications )
+
+# Thread for infinite loop ( notifications handler )
+event = threading.Event()
+infinite_loop = threading.Thread( target=wait_for_notifications )
+infinite_loop.start()
+
 # Begin main recurse loop
-speak("Приветствую. Я Вас слушаю")
+speak( "Приветствую. Я Вас слушаю" )
 listen()
+
+# Exit
+infinite_loop.stop()
