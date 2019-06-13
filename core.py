@@ -324,7 +324,9 @@ infinite_loop = threading.Thread( target=wait_for_notifications )
 infinite_loop.start()
 
 # Begin main recurse loop
+
 speak( "Приветствую. Я Вас слушаю" )
+execute_cmd('settings','')
 listen()
 
 # Exit

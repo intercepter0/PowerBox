@@ -9,12 +9,18 @@
 # WARNING! All changes made in this file will be lost!
 
 from PySide2 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import pyqtSlot
 import speech_recognition as sr
 import os
 
 assets_path = os.path.realpath(__file__).replace("ui.py", "/assets/")
 
 class Ui_Dialog(object):
+
+    @pyqtSlot()
+    def clear_log_button_clicked(self):
+        print("CLEAR!")
+        self.textEdit.append("WOW")
 
 
     def keyPressEvent(self, e):
@@ -179,9 +185,9 @@ class Ui_Dialog(object):
         self.textEdit.setGeometry(QtCore.QRect(10, 8, 451, 311))
         font = QtGui.QFont()
         font.setFamily("Consolas")
-        font.setPointSize(15)
-        font.setWeight(75)
-        font.setBold(True)
+        font.setPointSize(11)
+        font.setWeight(40)
+        #font.setBold(True)
         self.textEdit.setFont(font)
         self.textEdit.setStyleSheet("QTextEdit {\n"
 "    border: none;\n"
@@ -196,6 +202,7 @@ class Ui_Dialog(object):
         self.pushButton.setIcon(icon1)
         self.pushButton.setIconSize(QtCore.QSize(20, 20))
         self.pushButton.setObjectName("pushButton")
+        #self.pushButton.clicked.connect(self.clear_log_button_clicked())
         self.tabWidget.addTab(self.log, "")
         self.settings = QtWidgets.QWidget()
         self.settings.setObjectName("settings")
