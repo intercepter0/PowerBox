@@ -22,7 +22,6 @@ def pre_init():
     ui = Ui_Dialog()
     ui.setupUi(Dialog)
 
-    ui.pushButton_2.clicked.connect(w)
 
 def update_notifications(database_path):
     dict = numpy.load( database_path + ".npy", allow_pickle=True ).item()

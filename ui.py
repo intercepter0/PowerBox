@@ -13,19 +13,37 @@ from PyQt5.QtCore import pyqtSlot
 import speech_recognition as sr
 import os
 
+pause = False
 assets_path = os.path.realpath(__file__).replace("ui.py", "/assets/")
 
 class Ui_Dialog(object):
 
     @pyqtSlot()
     def clear_log_button_clicked(self):
-        print("CLEAR!")
-        self.textEdit.append("WOW")
-
+        self.textEdit.clear()
 
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_Escape:
             self.close()
+
+    def set_pause_state(self, new_statement):
+        global pause
+        icon3 = QtGui.QIcon()
+
+        if( new_statement):
+            icon3.addPixmap(QtGui.QPixmap(assets_path + "run.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        else:
+            icon3.addPixmap(QtGui.QPixmap(assets_path + "pause.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+
+        self.pushButton_2.setIcon(icon3)
+        self.pushButton_2.setIconSize(QtCore.QSize(48, 48))
+
+        pause = new_statement
+
+    def pause_toggle(self,x):
+        global pause
+
+        self.set_pause_state(not pause)
 
     def add_notification( self, time, message ):
         self.listWidget.addItem( "[ {0} ] - {1}".format(time, message) )
@@ -202,7 +220,7 @@ class Ui_Dialog(object):
         self.pushButton.setIcon(icon1)
         self.pushButton.setIconSize(QtCore.QSize(20, 20))
         self.pushButton.setObjectName("pushButton")
-        #self.pushButton.clicked.connect(self.clear_log_button_clicked())
+        self.pushButton.clicked.connect(self.clear_log_button_clicked)
         self.tabWidget.addTab(self.log, "")
         self.settings = QtWidgets.QWidget()
         self.settings.setObjectName("settings")
@@ -320,6 +338,7 @@ class Ui_Dialog(object):
         self.pushButton_2.setIcon(icon2)
         self.pushButton_2.setIconSize(QtCore.QSize(48, 48))
         self.pushButton_2.setObjectName("pushButton_2")
+        self.pushButton_2.clicked.connect(self.pause_toggle)
 
 
 

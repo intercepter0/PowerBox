@@ -278,6 +278,7 @@ class Ui_Dialog(object):
         self.pushButton_2.setIcon(icon2)
         self.pushButton_2.setIconSize(QtCore.QSize(48, 48))
         self.pushButton_2.setObjectName("pushButton_2")
+        self.pushButton_2.clicked.connect(self.pause_toggle)
         self.label_6 = QtWidgets.QLabel(Dialog)
         self.label_6.setGeometry(QtCore.QRect(0, -40, 791, 611))
         self.label_6.setText("")
@@ -285,7 +286,7 @@ class Ui_Dialog(object):
         self.label_6.setScaledContents(True)
         self.label_6.setObjectName("label_6")
 
-        
+
 
         self.retranslateUi(Dialog)
         self.tabWidget.setCurrentIndex(0)
