@@ -18,6 +18,8 @@ import keyboard
 
 database_path = os.path.realpath(__file__).replace("core.py", "notifications_database")
 
+paused = False
+
 opts = {
     "alias": ('слушай', 'эй'),
     "tbr": ('скажи', 'расскажи', 'покажи', 'произнеси'),
@@ -116,8 +118,19 @@ def speak(message):
     ui_hook.append_log("PowerBox >> " + str(message))
     speak_engine.stop()
 
+# Set pause mode or normal mode
+def set_pause_state(new_state):
+    speak_engine.setProperty('volume', new_state)
+
+# Set volume ( 0 - 1 )
+def set_pause_state(new_state):
+    global volume
+    volume = new_state
+
 # Choose: known input or no
 def callback(recognizer, audio):
+    while paused:
+        sleep(1)
     try:
         voice = recognizer.recognize_google(audio, language="ru-RU").lower()
         ui_hook.append_log(getpass.getuser()+((8-len(list(getpass.getuser())))*' ')+" >> "+voice.capitalize())
@@ -287,16 +300,17 @@ with mic as source:
 
 # Init speak engine
 speak_engine = pyttsx3.init()
+speak_engine.setProperty( 'volume', 0.2 )
 
 # Pre-init ui
-ui_hook.pre_init()
+ui_hook.pre_init(set_pause_state, change_volume)
 
 # Clear console
 os.system('cls')
 
 # Print pretty banner
 banner = ["""
-    =-----------------------------------Welcome to---------------------------------------=
+    =---------------------------------- Welcome to --------------------------------------=
                                                                                     """, """
              ██████╗  ██████╗ ██╗    ██╗███████╗██████╗ ██████╗  ██████╗ ██╗  ██╗
              ██╔══██╗██╔═══██╗██║    ██║██╔════╝██╔══██╗██╔══██╗██╔═══██╗╚██╗██╔╝
@@ -326,7 +340,7 @@ infinite_loop.start()
 # Begin main recurse loop
 
 speak( "Приветствую. Я Вас слушаю" )
-execute_cmd('settings','')
+execute_cmd( 'settings', '' )
 listen()
 
 # Exit

@@ -3,80 +3,26 @@
 # Form implementation generated from reading ui file 'C:\Users\Alex\Documents\powerbox.ui',
 # licensing of 'C:\Users\Alex\Documents\powerbox.ui' applies.
 #
-# Created: Wed Jun 12 17:08:56 2019
+# Created: Fri Jun 14 22:12:38 2019
 #      by: pyside2-uic  running on PySide2 5.12.3
 #
 # WARNING! All changes made in this file will be lost!
 
 from PySide2 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import pyqtSlot
-import speech_recognition as sr
-import os
-
-
-pause = False
-assets_path = os.path.realpath(__file__).replace("ui.py", "/assets/")
 
 class Ui_Dialog(object):
-
-    @pyqtSlot()
-    def clear_log_button_clicked(self):
-        self.textEdit.clear()
-
-    def keyPressEvent(self, e):
-        if e.key() == Qt.Key_Escape:
-            self.close()
-
-    def set_pause_state(self, new_statement):
-        global pause
-        icon3 = QtGui.QIcon()
-
-        if( new_statement):
-            icon3.addPixmap(QtGui.QPixmap(assets_path + "run.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        else:
-            icon3.addPixmap(QtGui.QPixmap(assets_path + "pause.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-
-        self.pushButton_2.setIcon(icon3)
-        self.pushButton_2.setIconSize(QtCore.QSize(48, 48))
-
-        pause = new_statement
-        self.core_pause_state(new_statement)
-
-    def pause_toggle(self,x):
-        global pause
-
-        self.set_pause_state(not pause)
-
-    def change_volume(self,x):
-        global volume
-
-        volume = x
-        self.core_change_volume(volume)
-
-    def add_notification( self, time, message ):
-        self.listWidget.addItem( "[ {0} ] - {1}".format(time, message) )
-
-
-    def append_log( self, message ):
-        self.textEdit.append(message)
-
-
-    def setupUi( self, Dialog, core_pause_state, core_change_volume ):
-        global assets_path
-
-        self.core_pause_state = core_pause_state
-        self.core_change_volume = core_change_volume
-        Dialog.setObjectName( "Dialog" )
+    def setupUi(self, Dialog):
+        Dialog.setObjectName("Dialog")
         Dialog.resize(560, 530)
-        Dialog.setMinimumSize(QtCore.QSize(560, 530))
-        Dialog.setMaximumSize(QtCore.QSize(560, 530))
+        Dialog.setMinimumSize(QtCore.QSize(0, 0))
+        Dialog.setMaximumSize(QtCore.QSize(789, 530))
         font = QtGui.QFont()
         font.setPointSize(8)
         Dialog.setFont(font)
         Dialog.setMouseTracking(False)
         Dialog.setTabletTracking(False)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(assets_path + "powerbox.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(":/logo/powerbox.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         Dialog.setWindowIcon(icon)
         Dialog.setWindowOpacity(1.0)
         Dialog.setLayoutDirection(QtCore.Qt.LeftToRight)
@@ -199,7 +145,7 @@ class Ui_Dialog(object):
         self.tableWidget.horizontalHeader().setMinimumSectionSize(50)
         self.tableWidget.horizontalHeader().setSortIndicatorShown(False)
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
-        self.tableWidget.verticalHeader().setVisible(True)
+        self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.verticalHeader().setCascadingSectionResizes(True)
         self.tableWidget.verticalHeader().setDefaultSectionSize(50)
         self.tableWidget.verticalHeader().setHighlightSections(True)
@@ -213,9 +159,9 @@ class Ui_Dialog(object):
         self.textEdit.setGeometry(QtCore.QRect(10, 8, 451, 311))
         font = QtGui.QFont()
         font.setFamily("Consolas")
-        font.setPointSize(11)
-        font.setWeight(40)
-        #font.setBold(True)
+        font.setPointSize(15)
+        font.setWeight(75)
+        font.setBold(True)
         self.textEdit.setFont(font)
         self.textEdit.setStyleSheet("QTextEdit {\n"
 "    border: none;\n"
@@ -226,11 +172,10 @@ class Ui_Dialog(object):
         self.pushButton.setGeometry(QtCore.QRect(462, 0, 32, 32))
         self.pushButton.setText("")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(assets_path + "delete.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(":/buttons/E:/Python/PowerBox/delete.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButton.setIcon(icon1)
         self.pushButton.setIconSize(QtCore.QSize(20, 20))
         self.pushButton.setObjectName("pushButton")
-        self.pushButton.clicked.connect(self.clear_log_button_clicked)
         self.tabWidget.addTab(self.log, "")
         self.settings = QtWidgets.QWidget()
         self.settings.setObjectName("settings")
@@ -239,8 +184,6 @@ class Ui_Dialog(object):
         self.groupBox.setObjectName("groupBox")
         self.comboBox = QtWidgets.QComboBox(self.groupBox)
         self.comboBox.setGeometry(QtCore.QRect(10, 22, 201, 22))
-        for index, name in enumerate(sr.Microphone.list_microphone_names()):
-                    self.comboBox.addItem(name)
         self.comboBox.setObjectName("comboBox")
         self.groupBox_2 = QtWidgets.QGroupBox(self.settings)
         self.groupBox_2.setGeometry(QtCore.QRect(240, 75, 221, 61))
@@ -263,37 +206,15 @@ class Ui_Dialog(object):
         self.label_5 = QtWidgets.QLabel(self.groupBox_3)
         self.label_5.setGeometry(QtCore.QRect(183, 17, 31, 31))
         self.label_5.setText("")
-        self.label_5.setPixmap(QtGui.QPixmap(assets_path + "right.png"))
+        self.label_5.setPixmap(QtGui.QPixmap(":/result/right.png"))
         self.label_5.setScaledContents(True)
         self.label_5.setObjectName("label_5")
-
-
-        #self.label_6 = QtWidgets.QLabel(Dialog)
-        #self.label_6.setGeometry(QtCore.QRect(0, -40, 791, 611))
-        #self.label_6.setText("")
-        #self.label_6.setPixmap(QtGui.QPixmap(":/bg/image036.png"))
-        #self.label_6.setScaledContents(True)
-        #self.label_6.setObjectName("label_6")
-
-
         self.label_7 = QtWidgets.QLabel(self.settings)
         self.label_7.setGeometry(QtCore.QRect(0, 120, 501, 261))
         self.label_7.setText("")
-        self.label_7.setPixmap(QtGui.QPixmap(assets_path + "ffbg.png"))
+        self.label_7.setPixmap(QtGui.QPixmap(":/bg/ffbg.png"))
         self.label_7.setScaledContents(True)
         self.label_7.setObjectName("label_7")
-
-        self.horizontalSlider = QtWidgets.QSlider(Dialog)
-        self.horizontalSlider.setGeometry(QtCore.QRect(340, 130, 160, 22))
-        self.horizontalSlider.setMaximum(100)
-        self.horizontalSlider.setProperty("value", 90)
-        self.horizontalSlider.setOrientation(QtCore.Qt.Horizontal)
-        self.horizontalSlider.setObjectName("horizontalSlider")
-        self.horizontalSlider.valueChanged.connect(self.change_volume)
-        self.label_8 = QtWidgets.QLabel(Dialog)
-        self.label_8.setGeometry(QtCore.QRect(340, 110, 101, 16))
-        self.label_8.setObjectName("label_8")
-
         self.groupBox_4 = QtWidgets.QGroupBox(self.settings)
         self.groupBox_4.setGeometry(QtCore.QRect(240, 10, 221, 61))
         self.groupBox_4.setObjectName("groupBox_4")
@@ -306,11 +227,13 @@ class Ui_Dialog(object):
         self.listWidget = QtWidgets.QListWidget(self.tab)
         self.listWidget.setGeometry(QtCore.QRect(-1, -1, 496, 316))
         self.listWidget.setObjectName("listWidget")
+        QtWidgets.QListWidgetItem(self.listWidget)
+        QtWidgets.QListWidgetItem(self.listWidget)
         self.tabWidget.addTab(self.tab, "")
         self.label = QtWidgets.QLabel(Dialog)
         self.label.setGeometry(QtCore.QRect(30, 20, 109, 109))
         self.label.setText("")
-        self.label.setPixmap(QtGui.QPixmap(assets_path + "powerboxBright.png"))
+        self.label.setPixmap(QtGui.QPixmap(":/logo/powerboxBright.png"))
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(Dialog)
@@ -337,42 +260,37 @@ class Ui_Dialog(object):
         self.label_3.setScaledContents(False)
         self.label_3.setWordWrap(False)
         self.label_3.setObjectName("label_3")
-
-        font = QtGui.QFont()
-        font.setFamily("Bahnschrift SemiBold")
-        font.setPointSize(12)
-        font.setWeight(75)
-        font.setUnderline(False)
-        font.setBold(True)
-        self.label_3.setFont(font)
-        self.label_3.setStyleSheet("QLabel {\n"
-"    color: rgb(38, 96, 140);\n"
-"}")
-        self.label_3.setFrameShadow(QtWidgets.QFrame.Plain)
-        self.label_3.setScaledContents(False)
-        self.label_3.setWordWrap(False)
-        self.label_3.setObjectName("label_3")
         self.pushButton_2 = QtWidgets.QPushButton(Dialog)
         self.pushButton_2.setGeometry(QtCore.QRect(390, 40, 60, 60))
         self.pushButton_2.setText("")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(assets_path + "pause.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap(":/result/right.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButton_2.setIcon(icon2)
         self.pushButton_2.setIconSize(QtCore.QSize(48, 48))
         self.pushButton_2.setObjectName("pushButton_2")
-        self.pushButton_2.clicked.connect(self.pause_toggle)
+        self.label_6 = QtWidgets.QLabel(Dialog)
+        self.label_6.setGeometry(QtCore.QRect(100, 0, 791, 611))
+        self.label_6.setStyleSheet("QLabel {\n"
+"    opacity: 0;\n"
+"}")
+        self.label_6.setText("")
+        self.label_6.setPixmap(QtGui.QPixmap(":/bg/image036.png"))
+        self.label_6.setScaledContents(True)
+        self.label_6.setObjectName("label_6")
+        self.horizontalSlider = QtWidgets.QSlider(Dialog)
+        self.horizontalSlider.setGeometry(QtCore.QRect(340, 130, 160, 22))
+        self.horizontalSlider.setMaximum(100)
+        self.horizontalSlider.setProperty("value", 90)
+        self.horizontalSlider.setOrientation(QtCore.Qt.Horizontal)
+        self.horizontalSlider.setObjectName("horizontalSlider")
+        self.label_8 = QtWidgets.QLabel(Dialog)
+        self.label_8.setGeometry(QtCore.QRect(340, 110, 101, 16))
+        self.label_8.setObjectName("label_8")
 
-
-
-
-#-------------\
-
-
-
-#--------------/
         self.retranslateUi(Dialog)
-        self.comboBox.setCurrentIndex(1)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(2)
+        self.comboBox.setCurrentIndex(-1)
+        self.comboBox_2.setCurrentIndex(-1)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
@@ -427,8 +345,22 @@ class Ui_Dialog(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.settings), QtWidgets.QApplication.translate("Dialog", "Настройки", None, -1))
         __sortingEnabled = self.listWidget.isSortingEnabled()
         self.listWidget.setSortingEnabled(False)
+        self.listWidget.item(0).setText(QtWidgets.QApplication.translate("Dialog", "[ 17:00 ] - Сделать уроки", None, -1))
+        self.listWidget.item(1).setText(QtWidgets.QApplication.translate("Dialog", "[ 88:00] - Ещё что-то", None, -1))
         self.listWidget.setSortingEnabled(__sortingEnabled)
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QtWidgets.QApplication.translate("Dialog", "Напоминания", None, -1))
         self.label_2.setText(QtWidgets.QApplication.translate("Dialog", "PowerBox", None, -1))
         self.label_3.setText(QtWidgets.QApplication.translate("Dialog", "Everything you need.", None, -1))
         self.label_8.setText(QtWidgets.QApplication.translate("Dialog", "Громкость ( 90 )", None, -1))
+
+import PowerBox_rc
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    Dialog = QtWidgets.QDialog()
+    ui = Ui_Dialog()
+    ui.setupUi(Dialog)
+    Dialog.show()
+    sys.exit(app.exec_())
+

@@ -7,12 +7,8 @@ ui = None
 Dialog = None
 app = None
 
-def wtf():
-    print("Lol")
 
-w = wtf()
-
-def pre_init():
+def pre_init(set_pause_state):
     global ui
     global app
     global Dialog
@@ -20,7 +16,7 @@ def pre_init():
     app = QtWidgets.QApplication(sys.argv)
     Dialog = QtWidgets.QDialog()
     ui = Ui_Dialog()
-    ui.setupUi(Dialog)
+    ui.setupUi(Dialog, set_pause_state)
 
 
 def update_notifications(database_path):
