@@ -8,7 +8,7 @@ Dialog = None
 app = None
 
 
-def pre_init(set_pause_state):
+def pre_init(set_pause_state, core_change_volume):
     global ui
     global app
     global Dialog
@@ -16,7 +16,7 @@ def pre_init(set_pause_state):
     app = QtWidgets.QApplication(sys.argv)
     Dialog = QtWidgets.QDialog()
     ui = Ui_Dialog()
-    ui.setupUi(Dialog, set_pause_state)
+    ui.setupUi(Dialog, set_pause_state, core_change_volume)
 
 
 def update_notifications(database_path):

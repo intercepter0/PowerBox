@@ -123,9 +123,11 @@ def set_pause_state(new_state):
     speak_engine.setProperty('volume', new_state)
 
 # Set volume ( 0 - 1 )
-def set_pause_state(new_state):
+def change_volume(new_state):
     global volume
-    volume = new_state
+
+    volume = new_state / 100
+    speak_engine.setProperty('volume', volume)
 
 # Choose: known input or no
 def callback(recognizer, audio):
@@ -287,7 +289,8 @@ def execute_cmd(cmd, parameter):
 
     # Say thanks
     elif cmd == 'thanks':
-        speak( 'И Вам спасибо' )
+        # Deprecated
+        #speak( 'И Вам спасибо' )
 
 
 # Init recognizer
@@ -300,7 +303,6 @@ with mic as source:
 
 # Init speak engine
 speak_engine = pyttsx3.init()
-speak_engine.setProperty( 'volume', 0.2 )
 
 # Pre-init ui
 ui_hook.pre_init(set_pause_state, change_volume)
@@ -321,13 +323,16 @@ banner = ["""
                                                                                     """, """
     =------------------------------------------------------------------------------------=
                                                                                     """]
-cprint( banner[0],  'white')
-cprint( banner[1],  'cyan' )
-cprint( banner[2],  'white')
+cprint( banner[0],  'white' )
+cprint( banner[1],  'cyan'  )
+cprint( banner[2],  'white' )
 
 # Notifications database
 notifications = dict()
 update_notifications()
+
+# Hotkeys to call "line"
+keyboard.add_hotkey( 'Shift + Space', lambda: execute_cmd( 'line', '' ) )
 
 # Print cached notifications
 print(' [log] Loaded notifications: ', notifications )
@@ -338,7 +343,6 @@ infinite_loop = threading.Thread( target=wait_for_notifications )
 infinite_loop.start()
 
 # Begin main recurse loop
-
 speak( "Приветствую. Я Вас слушаю" )
 execute_cmd( 'settings', '' )
 listen()

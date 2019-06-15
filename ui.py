@@ -51,6 +51,7 @@ class Ui_Dialog(object):
         global volume
 
         volume = x
+        self.label_8.setText( 'Громкость ( {0} )'.format(volume) )
         self.core_change_volume(volume)
 
     def add_notification( self, time, message ):
