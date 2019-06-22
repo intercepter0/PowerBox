@@ -5,6 +5,7 @@ from fuzzywuzzy import fuzz
 from time import sleep
 from termcolor import colored, cprint
 import pyttsx3
+import requests
 import datetime
 import webbrowser
 import random
@@ -15,10 +16,17 @@ import getpass
 import ui_hook
 import threading
 import keyboard
+import re
+import pywin32
+import wmi # Core temp
+import wikipedia
 
 database_path = os.path.realpath(__file__).replace("core.py", "notifications_database")
 
 paused = False
+line_hotkeys_enabled = True
+device_index = 1
+city = 'Симферополь'
 
 opts = {
     "alias": ('слушай', 'эй'),
@@ -29,11 +37,13 @@ opts = {
         "count": ('сколько будет', 'посчитай'),
         "write": ('напечатай', 'напиши', 'напечатать', 'написать'),
         "lock": ('заблокировать', 'выйти из сеанса'),
+        "core_temp": ('температура процессора', 'как нагрет процессор'),
         "copy": ('скопировать', 'скопируй'),
         "clear_notifications": ('убрать напоминания', 'отменить напоминания'),
         "idk": ('простите я вас не понимаю', 'не понимаю'),
         "notify": ('напомнить', 'создать напоминание', 'напомни', 'напомни пожалуйста'),
         "line": ('открыть строку', 'открыть поиск'),
+        "what_is": ('что такое', 'значение слова', 'кто такой'),
         "settings": ('открыть настройки', 'настройки приложения'),
         "shutdown": ('завершение работы', 'выключить компьютер'),
         "shutdown_cancel": ('отмена', 'не выключать компьютер'),
@@ -118,16 +128,62 @@ def speak(message):
     ui_hook.append_log("PowerBox >> " + str(message))
     speak_engine.stop()
 
-# Set pause mode or normal mode
-def set_pause_state(new_state):
-    speak_engine.setProperty('volume', new_state)
+# Open powerline
+def show_line(with_hotkeys, hotkey_id):
+    global line_hotkeys_enabled
 
-# Set volume ( 0 - 1 )
-def change_volume(new_state):
-    global volume
+    print(" [log]: Line opened. With hotkeys: "+str(with_hotkeys))
 
-    volume = new_state / 100
-    speak_engine.setProperty('volume', volume)
+    if( with_hotkeys ):
+        if(line_hotkeys_enabled):
+            print(hotkey_id)
+            powerline_path = os.path.realpath(__file__).replace("core.py", "") + "Powerline.exe"
+            os.system(powerline_path)
+    else:
+        powerline_path = os.path.realpath(__file__).replace("core.py", "") + "Powerline.exe"
+        os.system(powerline_path)
+
+
+def set_property( property_name, new_state ):
+    cprint( " [log] Changed property: "+str(property_name)+", value = "+str(new_state),'green' )
+    if( property_name == 'pause' ):
+        global paused
+        paused = new_state
+    elif( property_name == 'volume' ):
+        # Set volume ( 0 - 1 )
+        global volume
+
+        volume = new_state / 100
+        speak_engine.setProperty('volume', volume)
+    elif( property_name == 'line_hotkeys_enabled' ):
+        # Enable or diasble hotkeys to call 'line'
+        global line_hotkeys_enabled
+        line_hotkeys_enabled = new_state
+    elif( property_name == 'city' ):
+        # Set city name to show weather
+        global city
+        city = new_state
+    elif( property_name ==  'device_index' ):
+        # Set system index of microphone
+        global device_index
+        global mic
+        global r
+        device_index = new_state
+        mic = sr.Microphone( device_index=device_index )
+        with mic as source:
+            r.adjust_for_ambient_noise( source )
+
+
+def check_city_is_avaliable(city_name):
+    try:
+        global owm
+        obs = owm.weather_at_place(city_name)
+        w = obs.get_weather()
+
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 # Choose: known input or no
 def callback(recognizer, audio):
@@ -144,7 +200,7 @@ def callback(recognizer, audio):
             cmd = cmd.replace(x, "").strip()
 
         cmd = recognize_cmd(cmd)
-        if cmd['percent'] > 70:
+        if cmd['percent'] > 66:
             execute_cmd(cmd['cmd'], voice)
         else:
             speak("Простите, я вас не понимаю.")
@@ -153,7 +209,6 @@ def callback(recognizer, audio):
         print(" [log] Голос не распознан!")
     except sr.RequestError as e:
         print(" [log] Ошибка сети")
-    listen()
 
 # Uncorrect recognization
 def recognize_cmd(cmd):
@@ -197,6 +252,14 @@ def execute_cmd(cmd, parameter):
     elif cmd == 'lock':
         os.system('rundll32 user32.dll LockWorkStation')
 
+    #   Say current temperature of CPU
+    elif cmd == 'core_temp':
+        global temperature_infos
+        for sensor in temperature_infos:
+            if sensor.SensorType==u'Temperature':
+                print(sensor.Name)
+                print(sensor.Value)
+
     # Copy imput to clipboard
     elif cmd == 'copy':
         pyperclip.copy(parameter.replace('скопировать', '').replace('скопируй', '').strip())
@@ -224,11 +287,11 @@ def execute_cmd(cmd, parameter):
 
     # Say current weather
     elif cmd == 'weather':
+        global owm
+
         weather = dict()
 
-        # Init pyowm lib
-        owm = OWM('e3b69afc0e2c681527fee196cf54144d', language="RU")
-        obs = owm.weather_at_place('Севастополь')
+        obs = owm.weather_at_place(city)
         w = obs.get_weather()
 
         weather['temp'] = round(w.get_temperature(unit='celsius')['temp'])
@@ -256,8 +319,28 @@ def execute_cmd(cmd, parameter):
 
     # Open powerline
     elif cmd == 'line':
-        powerline_path = os.path.realpath(__file__).replace("core.py", "") + "Powerline.exe"
-        os.system(powerline_path)
+        show_line(False, 0)
+
+    # Read 2 first centences from wikipedia
+    elif cmd == 'what_is':
+        pattern = "\({1}[^)]*\){1}"
+        request = parameter
+        for i in opts['cmds'].get("what_is"):
+            request = request.replace(i, '').strip()
+        try:
+            sentences = 2
+            text = wikipedia.summary(request, sentences=sentences)
+            while(len(text) < 120):
+                sentences += 1
+                text = wikipedia.summary(request, sentences=sentences)
+            to_remove = re.findall(pattern, text)
+            print('Removed:',to_remove)
+            for r in to_remove:
+                text = text.replace(r,'').strip()
+            speak(text)
+        except Exception as e:
+            speak('Простите. Не удалось найти информацию об этом.')
+            print(e.message)
 
     # Open dialog
     elif cmd == 'settings':
@@ -289,15 +372,15 @@ def execute_cmd(cmd, parameter):
 
     # Say thanks
     elif cmd == 'thanks':
+        pass
         # Deprecated
         #speak( 'И Вам спасибо' )
-
 
 # Init recognizer
 r = sr.Recognizer()
 
 # Init microphone
-mic = sr.Microphone( device_index=1 )
+mic = sr.Microphone( device_index=device_index )
 with mic as source:
     r.adjust_for_ambient_noise( source )
 
@@ -305,7 +388,7 @@ with mic as source:
 speak_engine = pyttsx3.init()
 
 # Pre-init ui
-ui_hook.pre_init(set_pause_state, change_volume)
+ui_hook.pre_init( set_property, check_city_is_avaliable )
 
 # Clear console
 os.system('cls')
@@ -327,12 +410,18 @@ cprint( banner[0],  'white' )
 cprint( banner[1],  'cyan'  )
 cprint( banner[2],  'white' )
 
+# Init pyowm lib
+owm = OWM('e3b69afc0e2c681527fee196cf54144d', language="RU")
+
 # Notifications database
 notifications = dict()
 update_notifications()
 
 # Hotkeys to call "line"
-keyboard.add_hotkey( 'Shift + Space', lambda: execute_cmd( 'line', '' ) )
+h = 0
+keyboard.add_hotkey( 'Ctrl + Space', lambda: show_line(True, random.randint(0, 10000)))
+h+=1
+keyboard.add_hotkey( 'Shift + Space', lambda: show_line(True, random.randint(0, 10000)))
 
 # Print cached notifications
 print(' [log] Loaded notifications: ', notifications )
@@ -342,10 +431,18 @@ event = threading.Event()
 infinite_loop = threading.Thread( target=wait_for_notifications )
 infinite_loop.start()
 
-# Begin main recurse loop
+# Wikipedia API config
+wikipedia.set_lang("ru")
+
+# Init WMI
+w = wmi.WMI(namespace="root\OpenHardwareMonitor")
+temperature_infos = w.Sensor()
+
+# Begin main loop
 speak( "Приветствую. Я Вас слушаю" )
-execute_cmd( 'settings', '' )
-listen()
+#execute_cmd( 'settings', '' )
+while (True):
+    listen()
 
 # Exit
 infinite_loop.stop()

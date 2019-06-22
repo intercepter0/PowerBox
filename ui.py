@@ -40,19 +40,35 @@ class Ui_Dialog(object):
         self.pushButton_2.setIconSize(QtCore.QSize(48, 48))
 
         pause = new_statement
-        self.core_pause_state(new_statement)
+        self.core_set_property( 'pause', new_statement )
 
     def pause_toggle(self,x):
         global pause
 
         self.set_pause_state(not pause)
 
+    def line_hotkeys_toggle(self):
+
+        self.core_set_property( 'line_hotkeys_enabled', self.checkBox.isChecked() )
+
     def change_volume(self,x):
         global volume
 
         volume = x
         self.label_8.setText( 'Громкость ( {0} )'.format(volume) )
-        self.core_change_volume(volume)
+        self.core_set_property( 'volume', volume )
+
+    def change_city(self,x):
+        global city
+
+        city = x
+        if(self.core_city_is_avaliable(city)):
+            self.label_5.setPixmap(QtGui.QPixmap(assets_path + "right.png"))
+        else:
+            self.label_5.setPixmap(None)
+
+        self.core_set_property( 'city', city )
+
 
     def add_notification( self, time, message ):
         self.listWidget.addItem( "[ {0} ] - {1}".format(time, message) )
@@ -62,11 +78,11 @@ class Ui_Dialog(object):
         self.textEdit.append(message)
 
 
-    def setupUi( self, Dialog, core_pause_state, core_change_volume ):
+    def setupUi( self, Dialog, core_set_property, core_city_is_avaliable ):
         global assets_path
 
-        self.core_pause_state = core_pause_state
-        self.core_change_volume = core_change_volume
+        self.core_set_property = core_set_property
+        self.core_city_is_avaliable = core_city_is_avaliable
         Dialog.setObjectName( "Dialog" )
         Dialog.resize(560, 530)
         Dialog.setMinimumSize(QtCore.QSize(560, 530))
@@ -132,10 +148,10 @@ class Ui_Dialog(object):
         self.tableWidget.setGridStyle(QtCore.Qt.DashLine)
         self.tableWidget.setWordWrap(True)
         self.tableWidget.setCornerButtonEnabled(True)
-        self.tableWidget.setRowCount(14)
+        self.tableWidget.setRowCount(15)
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(1)
-        self.tableWidget.setRowCount(14)
+        self.tableWidget.setRowCount(15)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setVerticalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -164,6 +180,8 @@ class Ui_Dialog(object):
         self.tableWidget.setVerticalHeaderItem(12, item)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setVerticalHeaderItem(13, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setVerticalHeaderItem(14, item)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -194,6 +212,8 @@ class Ui_Dialog(object):
         self.tableWidget.setItem(12, 0, item)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setItem(13, 0, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setItem(14, 0, item)
         self.tableWidget.horizontalHeader().setCascadingSectionResizes(True)
         self.tableWidget.horizontalHeader().setDefaultSectionSize(150)
         self.tableWidget.horizontalHeader().setHighlightSections(True)
@@ -254,6 +274,7 @@ class Ui_Dialog(object):
         self.checkBox.setChecked(True)
         self.checkBox.setTristate(False)
         self.checkBox.setObjectName("checkBox")
+        self.checkBox.stateChanged.connect(self.line_hotkeys_toggle)
         self.groupBox_3 = QtWidgets.QGroupBox(self.settings)
         self.groupBox_3.setGeometry(QtCore.QRect(10, 75, 221, 61))
         self.groupBox_3.setObjectName("groupBox_3")
@@ -261,6 +282,8 @@ class Ui_Dialog(object):
         self.lineEdit.setGeometry(QtCore.QRect(10, 22, 169, 22))
         self.lineEdit.setStyleSheet("")
         self.lineEdit.setObjectName("lineEdit")
+        #self.lineEdit.installEventFilter(self)
+        self.lineEdit.textEdited.connect(self.change_city)
         self.label_5 = QtWidgets.QLabel(self.groupBox_3)
         self.label_5.setGeometry(QtCore.QRect(183, 17, 31, 31))
         self.label_5.setText("")
@@ -393,6 +416,7 @@ class Ui_Dialog(object):
         self.tableWidget.verticalHeaderItem(11).setText(QtWidgets.QApplication.translate("Dialog", "Математ. операции", None, -1))
         self.tableWidget.verticalHeaderItem(12).setText(QtWidgets.QApplication.translate("Dialog", "Написание текста", None, -1))
         self.tableWidget.verticalHeaderItem(13).setText(QtWidgets.QApplication.translate("Dialog", "Поиск в Интернете", None, -1))
+        self.tableWidget.verticalHeaderItem(14).setText(QtWidgets.QApplication.translate("Dialog", "Объяснение слова / термина", None, -1))
         self.tableWidget.horizontalHeaderItem(0).setText(QtWidgets.QApplication.translate("Dialog", "Ключевые фразы", None, -1))
         __sortingEnabled = self.tableWidget.isSortingEnabled()
         self.tableWidget.setSortingEnabled(False)
@@ -410,6 +434,7 @@ class Ui_Dialog(object):
         self.tableWidget.item(11, 0).setText(QtWidgets.QApplication.translate("Dialog", "сколько будет <математ. выражение>, посчитай <математ. выражение>", None, -1))
         self.tableWidget.item(12, 0).setText(QtWidgets.QApplication.translate("Dialog", "напечатай <запрос>, напиши <запрос>, напечатать <запрос>, написать <запрос>", None, -1))
         self.tableWidget.item(13, 0).setText(QtWidgets.QApplication.translate("Dialog", "искать в браузере <запрос>, искать в интернете <запрос>, поиск в интернете <запрос>", None, -1))
+        self.tableWidget.item(14, 0).setText(QtWidgets.QApplication.translate("Dialog", "что такое <запрос>, значение слова <запрос>, кто такой <запрос>", None, -1))
         self.tableWidget.setSortingEnabled(__sortingEnabled)
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.functions), QtWidgets.QApplication.translate("Dialog", "Функции", None, -1))
         self.textEdit.setHtml(QtWidgets.QApplication.translate("Dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
