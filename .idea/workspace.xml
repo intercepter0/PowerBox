@@ -11,20 +11,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Handler.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="58">
-              <caret line="2" selection-start-line="2" selection-end-line="2" />
+            <state relative-caret-position="275">
+              <caret line="322" lean-forward="true" selection-start-line="322" selection-end-line="322" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="509">
-              <caret line="172" column="25" selection-start-line="172" selection-start-column="24" selection-end-line="172" selection-end-column="25" />
+            <state relative-caret-position="239">
+              <caret line="253" column="38" lean-forward="true" selection-start-line="253" selection-start-column="38" selection-end-line="253" selection-end-column="38" />
             </state>
           </provider>
         </entry>
@@ -32,8 +32,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="7018">
-              <caret line="246" column="60" selection-start-line="246" selection-start-column="60" selection-end-line="246" selection-end-column="60" />
+            <state relative-caret-position="8937">
+              <caret line="331" column="51" selection-start-line="331" selection-start-column="51" selection-end-line="331" selection-end-column="51" />
             </state>
           </provider>
         </entry>
@@ -53,14 +53,15 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/Handler.java" />
         <option value="$PROJECT_DIR$/core.py" />
         <option value="$PROJECT_DIR$/ui.py" />
+        <option value="$PROJECT_DIR$/src/Handler.java" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="953" />
+    <option name="x" value="436" />
+    <option name="y" value="-8" />
     <option name="width" value="974" />
     <option name="height" value="528" />
   </component>
@@ -69,6 +70,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -81,7 +83,6 @@
         </subPane>
       </pane>
       <pane id="Scope" />
-      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -116,7 +117,7 @@
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24973656" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25266525" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -145,24 +146,24 @@
     </layout>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/Handler.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="58">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="7018">
-          <caret line="246" column="60" selection-start-line="246" selection-start-column="60" selection-end-line="246" selection-end-column="60" />
+        <state relative-caret-position="8937">
+          <caret line="331" column="51" selection-start-line="331" selection-start-column="51" selection-end-line="331" selection-end-column="51" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/core.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="509">
-          <caret line="172" column="25" selection-start-line="172" selection-start-column="24" selection-end-line="172" selection-end-column="25" />
+        <state relative-caret-position="239">
+          <caret line="253" column="38" lean-forward="true" selection-start-line="253" selection-start-column="38" selection-end-line="253" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Handler.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="275">
+          <caret line="322" lean-forward="true" selection-start-line="322" selection-end-line="322" />
         </state>
       </provider>
     </entry>
