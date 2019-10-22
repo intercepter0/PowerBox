@@ -28,27 +28,26 @@ device_index = 1
 city = 'Симферополь'
 
 opts = {
-    "alias": ('слушай', 'эй'),
-    "tbr": ('скажи', 'расскажи', 'покажи', 'произнеси'),
+    "alias":  ('слушай', 'эй'),
+    "tbr":    ('скажи', 'расскажи', 'покажи', 'произнеси'),
     "cmds": {
-        "ctime": ('текущее время', 'сейчас времени', 'который час', 'сколько время'), #
-        "weather": ('какая погода', 'погода сегодня'), #
-        "count": ('сколько будет', 'посчитай'), #
-        "write": ('напечатай', 'напиши', 'напечатать', 'написать'), #
-        "lock": ('заблокировать', 'выйти из сеанса'), #
-        "core_temp": ('температура процессора', 'как нагрет процессор'),
-        "copy": ('скопировать', 'скопируй'), #
-        "clear_notifications": ('убрать напоминания', 'отменить напоминания'), #
-        "idk": ('простите я вас не понимаю', 'не понимаю'), #
-        "notify": ('напомнить', 'создать напоминание', 'напомни', 'напомни пожалуйста'), #
-        "line": ('открыть строку', 'открыть поиск'), #
-        "what_is": ('что такое', 'значение слова', 'кто такой'),
-        "settings": ('открыть настройки', 'настройки приложения'), #
-        "shutdown": ('завершение работы', 'выключить компьютер'), #
-        "shutdown_cancel": ('отмена', 'не выключать компьютер'), #
-        "restart": ('перезагрузить', 'перезагрузить компьютер', 'перезагрузить компьютер', 'перезагрузка компьютера'), #
-        "thanks": ('благодарю', 'спасибо', 'классно'), # Deprecated
-        "browser_search": ('искать в браузере', 'искать в интернете', 'ищи в браузере', 'ищи в интернете', 'поиск в интернете') #
+        "ctime":                   ('текущее время', 'сейчас времени', 'который час', 'сколько время'), #
+        "weather":                 ('какая погода', 'погода сегодня'), #
+        "count":                   ('сколько будет', 'посчитай'), #
+        "write":                   ('напечатай', 'напиши', 'напечатать', 'написать'), #
+        "lock":                    ('заблокировать', 'выйти из сеанса'), #
+        "copy":                    ('скопировать', 'скопируй'), #
+        "clear_notifications":     ('убрать напоминания', 'отменить напоминания'), #
+        "idk":                     ('простите я вас не понимаю', 'не понимаю'), #
+        "notify":                  ('напомнить', 'создать напоминание', 'напомни', 'напомни пожалуйста'), #
+        "line":                    ('открыть строку', 'открыть поиск'), #
+        "what_is":                 ('что такое', 'значение слова', 'кто такой'),
+        "settings":                ('открыть настройки', 'настройки приложения'), #
+        "shutdown":                ('завершение работы', 'выключить компьютер'), #
+        "shutdown_cancel":         ('отмена', 'не выключать компьютер'), #
+        "restart":                 ('перезагрузить', 'перезагрузить компьютер', 'перезагрузить компьютер', 'перезагрузка компьютера'), #
+        "thanks":                  ('благодарю', 'спасибо', 'классно'), # Deprecated
+        "browser_search":          ('искать в браузере', 'искать в интернете', 'ищи в браузере', 'ищи в интернете', 'поиск в интернете') #
     }
 }
 
@@ -251,14 +250,6 @@ def execute_cmd(cmd, parameter):
     elif cmd == 'lock':
         os.system('rundll32 user32.dll LockWorkStation')
 
-    #   Say current temperature of CPU
-    elif cmd == 'core_temp':
-        global temperature_infos
-        for sensor in temperature_infos:
-            if sensor.SensorType==u'Temperature':
-                print(sensor.Name)
-                print(sensor.Value)
-
     # Copy imput to clipboard
     elif cmd == 'copy':
         pyperclip.copy(parameter.replace('скопировать', '').replace('скопируй', '').strip())
@@ -306,8 +297,8 @@ def execute_cmd(cmd, parameter):
         weather['pressure'] = weather['pressure'].__add__(" ртутного столба")
 
         weather['humidity'] = str(w.get_humidity()) + "%"
-        speak("В Вашем городе сейчас {1} , температура: {0}°. Давление: {2}, влажность: {3}".format(weather['temp'],
-                weather['status'], weather['pressure'], weather['humidity']))
+        speak("В городе "+city+" сейчас {1} , температура: {0}°. Влажность: {2}".format(weather['temp'],
+                weather['status'], weather['humidity']))
 
     # Write input to current input line
     elif cmd == 'write':
@@ -339,7 +330,6 @@ def execute_cmd(cmd, parameter):
             speak(text)
         except Exception as e:
             speak('Простите. Не удалось найти информацию об этом.')
-            print(e.message)
 
     # Open dialog
     elif cmd == 'settings':
@@ -379,6 +369,8 @@ def execute_cmd(cmd, parameter):
 r = sr.Recognizer()
 
 # Init microphone
+print("Device: "+str(sr.Microphone.list_microphone_names()[device_index]))
+
 mic = sr.Microphone( device_index=device_index )
 with mic as source:
     r.adjust_for_ambient_noise( source )
@@ -433,14 +425,14 @@ infinite_loop.start()
 # Wikipedia API config
 wikipedia.set_lang("ru")
 
-import virt
-virt.start()
-
 # Begin main loop
 speak( "Приветствую. Я Вас слушаю" )
 #execute_cmd( 'settings', '' )
 while (True):
-    listen()
+    try:
+        listen()
+    except Exception as e:
+        print(e)
 
 # Exit
 infinite_loop.stop()
