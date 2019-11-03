@@ -1,6 +1,7 @@
 from pyautogui import size, position, FAILSAFE, hotkey, keyDown, keyUp, press
 from os import system, path, popen, _exit
 from pynput import mouse
+import core
 from ctypes import cast, POINTER, windll
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
@@ -62,6 +63,9 @@ def switch_desktop(side):
     hotkey('win', 'ctrl', 'right' if side == 1 else 'left')
 
 
+def voice_assistant():
+    core.listen()
+
 def exit():
     _exit(0)
 
@@ -106,6 +110,7 @@ AVAILABLE_ACTIONS = {
     'start_powerline': open_powerline,
     'lock_session': lock_session,
     'switch_apps': switch_apps,
+    'voice_assistant': voice_assistant,
     'exit': exit,
     'none': lambda dy = 0: None
 }
@@ -121,7 +126,7 @@ actions_on_scroll =      ['none',                 'switch_apps',                
                           'none',                 'switch_desktop',                 'none']
 
 
-actions_on_wheel_press = ['none',                 'none',                    'exit',
+actions_on_wheel_press = ['voice_assistant',      'none',                    'exit',
                           'none',                 'none',                    'none',
                           'none',                 'lock_session',            'start_powerline']
 
@@ -178,4 +183,3 @@ with mouse.Listener(
     on_move=on_move,
     on_scroll=on_scroll) as listener:
     listener.join()
-
