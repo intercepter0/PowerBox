@@ -9,7 +9,6 @@
 # WARNING! All changes made in this file will be lost!
 
 from PySide2 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import pyqtSlot
 import speech_recognition as sr
 import os
 
@@ -19,7 +18,7 @@ assets_path = os.path.realpath(__file__).replace("ui.py", "/assets/")
 
 class Ui_Dialog(object):
 
-    @pyqtSlot()
+
     def clear_log_button_clicked(self):
         self.textEdit.clear()
 

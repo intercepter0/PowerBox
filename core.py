@@ -17,12 +17,15 @@ import ui_hook
 import threading
 import keyboard
 import re
+from playsound import playsound
 import wmi # Core temp
 import wikipedia
-
-database_path = os.path.realpath(__file__).replace("core.py", "notifications_database")
+file_name = os.path.basename(__file__)
+database_path = os.path.realpath(__file__).replace(file_name, "notifications_database")
+dir_path = os.path.realpath(__file__).replace(file_name, "")
 
 paused = False
+need_to_listen = False
 line_hotkeys_enabled = True
 device_index = 1
 city = 'Симферополь'
@@ -95,9 +98,9 @@ def wait_for_notifications():
         current_time = str(now.hour) + ':' + (str(now.minute) if len(str(now.minute)) > 1 else '0' + str(now.minute))
         if(current_time in notifications):
             speak( notifications.pop(current_time) )
-        sleep(60)
+        sleep(10)
 
-# Make decorator whitch makes function synchronized
+# Make decorator witch makes function synchronized
 def synchronized(wrapped):
     lock = threading.Lock()
     @functools.wraps(wrapped)
@@ -115,16 +118,19 @@ def listen():
         r.pause_threshold = 0.5
         r.non_speaking_duration = 0.5
         audio = r.listen(source)
-        callback(r, audio)
+        if need_to_listen:
+            callback(r, audio)
+
 
 # Say any text message
 @synchronized
 def speak(message):
+    global speak_engine
     print(" [log] Speak: ", message)
     speak_engine.say(message)
     speak_engine.runAndWait()
-    ui_hook.append_log("PowerBox >> " + str(message))
     speak_engine.stop()
+    ui_hook.append_log("PowerBox >> " + str(message))
 
 # Open powerline
 def show_line(with_hotkeys, hotkey_id):
@@ -147,6 +153,13 @@ def set_property( property_name, new_state ):
     if( property_name == 'pause' ):
         global paused
         paused = new_state
+    elif(property_name == 'need_to_listen'):
+        global need_to_listen
+        need_to_listen = new_state
+        if need_to_listen:
+            playsound(dir_path+'\enable.wav')
+        else:
+            playsound(dir_path+'\disable.wav')
     elif( property_name == 'volume' ):
         # Set volume ( 0 - 1 )
         global volume
@@ -185,8 +198,6 @@ def check_city_is_avaliable(city_name):
 
 # Choose: known input or no
 def callback(recognizer, audio):
-    while paused:
-        sleep(1)
     try:
         voice = recognizer.recognize_google(audio, language="ru-RU").lower()
         ui_hook.append_log(getpass.getuser()+((8-len(list(getpass.getuser())))*' ')+" >> "+voice.capitalize())
@@ -224,7 +235,7 @@ def recognize_cmd(cmd):
 
 # Execute correct command
 def execute_cmd(cmd, parameter):
-    print(" [log] Exec: ", cmd)
+    print(" [log] Execute: ", cmd)
 
     # Say current time
     if cmd == 'ctime':
@@ -250,7 +261,7 @@ def execute_cmd(cmd, parameter):
     elif cmd == 'lock':
         os.system('rundll32 user32.dll LockWorkStation')
 
-    # Copy imput to clipboard
+    # Copy input to clipboard
     elif cmd == 'copy':
         pyperclip.copy(parameter.replace('скопировать', '').replace('скопируй', '').strip())
 
@@ -278,27 +289,30 @@ def execute_cmd(cmd, parameter):
     # Say current weather
     elif cmd == 'weather':
         global owm
+        try:
+            weather = dict()
 
-        weather = dict()
+            obs = owm.weather_at_place(city)
+            w = obs.get_weather()
 
-        obs = owm.weather_at_place(city)
-        w = obs.get_weather()
+            weather['temp'] = round(w.get_temperature(unit='celsius')['temp'])
+            weather['status'] = w.get_detailed_status()
+            weather['pressure'] = (str(round(w.get_pressure()['press']*0.750063755419211)))  # гПа -> мм.р.с
+            p1 = [0, 5, 6, 7, 8, 9]
+            if int(weather['pressure']) % 10 in p1:
+                weather['pressure'] = str(weather['pressure']).__add__(" миллиметров")
+            elif int(weather['pressure']) % 10 == 1:
+                weather['pressure'] = str(weather['pressure']).__add__(" миллиметр")
+            else:
+                weather['pressure'] = str(weather['pressure']).__add__(" миллиметрa")
+            weather['pressure'] = weather['pressure'].__add__(" ртутного столба")
 
-        weather['temp'] = round(w.get_temperature(unit='celsius')['temp'])
-        weather['status'] = w.get_detailed_status()
-        weather['pressure'] = (str(round(w.get_pressure()['press']*0.750063755419211)))  # гПа -> мм.р.с
-        p1 = [0, 5, 6, 7, 8, 9]
-        if int(weather['pressure']) % 10 in p1:
-            weather['pressure'] = str(weather['pressure']).__add__(" миллиметров")
-        elif int(weather['pressure']) % 10 == 1:
-            weather['pressure'] = str(weather['pressure']).__add__(" миллиметр")
-        else:
-            weather['pressure'] = str(weather['pressure']).__add__(" миллиметрa")
-        weather['pressure'] = weather['pressure'].__add__(" ртутного столба")
+            weather['humidity'] = str(w.get_humidity()) + "%"
+            speak("В городе "+city+" сейчас {1} , температура: {0}°. Влажность: {2}".format(weather['temp'],
+                    weather['status'], weather['humidity']))
+        except Exception as e:
+            print(str(e))
 
-        weather['humidity'] = str(w.get_humidity()) + "%"
-        speak("В городе "+city+" сейчас {1} , температура: {0}°. Влажность: {2}".format(weather['temp'],
-                weather['status'], weather['humidity']))
 
     # Write input to current input line
     elif cmd == 'write':
@@ -365,21 +379,29 @@ def execute_cmd(cmd, parameter):
         # Deprecated
         #speak( 'И Вам спасибо' )
 
-# Init recognizer
-r = sr.Recognizer()
-
-# Init microphone
-print("Device: "+str(sr.Microphone.list_microphone_names()[device_index]))
-
-mic = sr.Microphone( device_index=device_index )
-with mic as source:
-    r.adjust_for_ambient_noise( source )
+print(" [log] PowerBox core is running!")
 
 # Init speak engine
 speak_engine = pyttsx3.init()
 
+try:
+    # Init recognizer
+    r = sr.Recognizer()
+
+    # Init microphone
+    print("Device: "+str(sr.Microphone.list_microphone_names()[device_index]))
+
+    mic = sr.Microphone( device_index=device_index )
+    with mic as source:
+        r.adjust_for_ambient_noise( source )
+except:
+    speak("Ошибка: микрофон не подключен. Модуль голосовой ассистент не может работать без микрофона.")
+
+
+
 # Pre-init ui
 ui_hook.pre_init( set_property, check_city_is_avaliable )
+ui_init = True
 
 # Clear console
 os.system('cls')
@@ -425,6 +447,33 @@ infinite_loop.start()
 # Wikipedia API config
 wikipedia.set_lang("ru")
 
+
+def listen_from_frame_utils():
+    global need_to_listen
+    set_property('need_to_listen', not need_to_listen)
+
+
+def init_frame_utils():
+    global listen_from_frame_utils
+    listen_from_frame_utils()
+    import frame_utils
+    frame_utils.init_listen_func(listen_from_frame_utils)
+
+
+event1 = threading.Event()
+frame_utils_thread = threading.Thread( target=init_frame_utils )
+frame_utils_thread.start()
+
+
+while True:
+    if need_to_listen:
+        try:
+            listen()
+        except:
+            pass
+    sleep(0.05)
+
+"""
 # Begin main loop
 speak( "Приветствую. Я Вас слушаю" )
 #execute_cmd( 'settings', '' )
@@ -436,3 +485,4 @@ while (True):
 
 # Exit
 infinite_loop.stop()
+"""
